@@ -1,0 +1,35 @@
+steps:
+  # Build Docker Image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t", "gcr.io/project-prn231-gr3/api-auth-service:$COMMIT_SHA",
+        "-f", "api-auth-service/Dockerfile",
+        "."
+      ]
+
+  # Push Docker Image lên Google Container Registry (GCR)
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/project-prn231-gr3/api-auth-service:$COMMIT_SHA"]
+
+  # Deploy lên Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run", "deploy", "api-auth-service",
+        "--image", "gcr.io/project-prn231-gr3/api-auth-service:$COMMIT_SHA",
+        "--region", "asia-east1",
+        "--platform", "managed",
+        "--allow-unauthenticated",
+        "--port", "5202"
+      ]
+
+# Define a Google Cloud Storage bucket for build logs
+logsBucket: "gs://auth-service-log/"
+
+images:
+  - "gcr.io/project-prn231-gr3/api-auth-service"
+
+# Set build timeout to 15 minutes
+timeout: 600s
