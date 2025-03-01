@@ -22,7 +22,7 @@ steps:
         "--region", "asia-east1",
         "--platform", "managed",
         "--allow-unauthenticated",
-        "--port", "5202"
+        "--port", "5173"
       ]
 
 # Define a Google Cloud Storage bucket for build logs
