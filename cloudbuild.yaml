@@ -6,7 +6,7 @@ steps:
         "build",
         "-t", "gcr.io/project-prn231-gr3/api-auth-service:$COMMIT_SHA",
         "-f", "api-auth-service/Dockerfile",
-        "api-auth-service"
+        "."
       ]
 
   # Push Docker Image lên Google Container Registry (GCR)
