@@ -7,7 +7,7 @@ WORKDIR /src
 COPY ["api-auth-service/api-auth-service.csproj", "./"]
 RUN dotnet restore "api-auth-service.csproj"
 
-COPY api-ai-service/ .  
+COPY api-auth-service/ .  
 RUN dotnet build "api-auth-service.csproj" -c Release -o /app/build
 
 FROM build AS publish
