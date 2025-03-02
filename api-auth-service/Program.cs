@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = FetchFromDatabase("Y94+WuTkBaaphJTps8IvmdB2IazYjKRnMkm3rFhUR4iArt3MFxRfr9UKMUdtF6w3/Gmykqm/PdH5MwO1UaJYVWKsBMLnCwjquJnoZZYIhIc=", "0000000000000000");
     options.ClientSecret = FetchFromDatabase("afKSUhIxf/0VZsGl8bq1s2cUJ6IKnl9pn6WnlYpQv2o54228Q+0Y6CPBLXjg+m6/", "1111111111111111");  // Read from appsettings.json
-    options.CallbackPath = "/login"; // The callback URL after login
+    options.CallbackPath = "/signin-google"; // The callback URL after login
 });
 
 // Register Swagger services
