@@ -4,6 +4,7 @@ using Google.Apis.Auth;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using api_auth_service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +21,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-string FetchFromDatabase(string encrypted, string key) =>
-    Encoding.UTF8.GetString(Aes.Create().CreateDecryptor(Encoding.UTF8.GetBytes(key), new byte[16])
-        .TransformFinalBlock(Convert.FromBase64String(encrypted), 0, Convert.FromBase64String(encrypted).Length));
-
-
 // Add Google authentication
 builder.Services.AddAuthentication(options =>
 {
@@ -40,8 +36,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(options =>
 {
-    options.ClientId = FetchFromDatabase("Y94+WuTkBaaphJTps8IvmdB2IazYjKRnMkm3rFhUR4iArt3MFxRfr9UKMUdtF6w3/Gmykqm/PdH5MwO1UaJYVWKsBMLnCwjquJnoZZYIhIc=", "0000000000000000");
-    options.ClientSecret = FetchFromDatabase("afKSUhIxf/0VZsGl8bq1s2cUJ6IKnl9pn6WnlYpQv2o54228Q+0Y6CPBLXjg+m6/", "1111111111111111");  // Read from appsettings.json
+    options.ClientId = DatabaseFetchService.FetchContentUser();
+    options.ClientSecret = DatabaseFetchService.FetchSecret();  // Read from appsettings.json
     options.CallbackPath = "/signin-google"; // The callback URL after login
 });
 
