@@ -1,0 +1,48 @@
+﻿@page
+@model api_auth_service.Pages.Login.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Google</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <h1>Login with Google</h1>
+
+    <!-- Ensure the form submits to the current page with a POST request -->
+    <form id="login-form" method="post" asp-page="Login">
+        <input type="hidden" name="IdToken" id="id-token">
+        <input type="hidden" name="ReturnUrl" id="return-url">
+    </form>
+
+    <div id="google-signin-button"></div>
+
+    <script>
+        function handleCredentialResponse(response) {
+            // Fill hidden input fields with token and return URL
+            document.getElementById("id-token").value = response.credential;
+            document.getElementById("return-url").value = new URLSearchParams(window.location.search).get("url") || "/";
+
+            // Submit the form programmatically
+            document.getElementById("login-form").submit();
+        }
+
+        window.onload = function() {
+            google.accounts.id.initialize({
+                client_id: "290066260782-o2gtb1mev7aq0pi736n3bcrl6v8m3fim.apps.googleusercontent.com",
+                callback: handleCredentialResponse
+            });
+
+            google.accounts.id.renderButton(
+                document.getElementById("google-signin-button"),
+                { theme: "outline", size: "large" }
+            );
+        };
+    </script>
+</body>
+</html>
