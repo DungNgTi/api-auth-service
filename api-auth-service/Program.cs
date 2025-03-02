@@ -34,7 +34,7 @@ builder.Services.AddAuthentication(options =>
 .AddCookie("Cookies", options =>
 {
     options.Cookie.Name = "MyAuthCookie"; // Shared cookie name
-    options.Cookie.Domain = ".localhost"; // Enable sharing cookies between localhost subdomains
+    options.Cookie.Domain = null; // Remove domain setting
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Secure cookie policy
     options.Cookie.SameSite = SameSiteMode.None; // Allow sharing cookies across ports
 })
@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = FetchFromDatabase("Y94+WuTkBaaphJTps8IvmdB2IazYjKRnMkm3rFhUR4iArt3MFxRfr9UKMUdtF6w3/Gmykqm/PdH5MwO1UaJYVWKsBMLnCwjquJnoZZYIhIc=", "0000000000000000");
     options.ClientSecret = FetchFromDatabase("afKSUhIxf/0VZsGl8bq1s2cUJ6IKnl9pn6WnlYpQv2o54228Q+0Y6CPBLXjg+m6/", "1111111111111111");  // Read from appsettings.json
-    options.CallbackPath = "/signin-google"; // The callback URL after login
+    options.CallbackPath = "/login"; // The callback URL after login
 });
 
 // Register Swagger services
@@ -51,6 +51,7 @@ builder.Services.AddSwaggerGen();  // Enable Swagger UI
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
+builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
 
 var app = builder.Build();
 

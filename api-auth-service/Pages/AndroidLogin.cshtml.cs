@@ -52,7 +52,7 @@ namespace api_auth_service.Pages
             }
             catch (Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token", error = ex.Message });
+                return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token", error = ex.ToString() });
             }
         }
     }
