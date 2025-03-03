@@ -18,6 +18,14 @@ namespace api_auth_service.Pages.Login
     {
         public static readonly LoginService _service = new();
 
+        private static int timeInSecond;
+
+        public LoginModel(IConfiguration configuration)
+        {
+            var delay = configuration["Cookie:Second"];
+            timeInSecond = delay == null ? 604800 : int.Parse(delay);
+        }
+
         [BindProperty]
         public string IdToken { get; set; }
 
@@ -50,7 +58,7 @@ namespace api_auth_service.Pages.Login
                     HttpOnly = true,
                     Secure = true,  // Required for HTTPS security
                     SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                    Expires = DateTime.UtcNow.AddDays(7)
+                    Expires = DateTime.UtcNow.AddSeconds(timeInSecond)
                 });
 
                 // Construct a safe return URL (avoid open redirects)

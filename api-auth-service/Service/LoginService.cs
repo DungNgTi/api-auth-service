@@ -27,6 +27,7 @@ namespace api_auth_service.Service
 
                 return new GoogleJsonWebSignature.Payload
                 {
+                    Picture = jwtToken.Claims.FirstOrDefault(c => c.Type == "picture")?.Value,
                     Issuer = jwtToken.Issuer,
                     Audience = jwtToken.Audiences.FirstOrDefault(),
                     Email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value,
