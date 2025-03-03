@@ -17,8 +17,18 @@
     </form>
 
     <script>
+
+        function setCookie(cname, cvalue, exMins) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exMins*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        
         // Optionally, you can automatically redirect after a certain time
         setTimeout(() => {
+            setCookie('googleToken','',0)
             window.location.href = '@Model.ReturnUrl'; // Redirect to ReturnUrl if provided
         }, 2000); // 2 seconds delay before redirecting
     </script>

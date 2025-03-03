@@ -32,9 +32,48 @@ namespace api_auth_service.Pages.Login
         [BindProperty]
         public string ReturnUrl { get; set; }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
             ReturnUrl = Request.Query["url"];
+            var cookieValue = Request.Cookies["googleToken"];
+
+            if (!string.IsNullOrEmpty(cookieValue))
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(cookieValue))
+                    {
+                        StatusCode((int)HttpStatusCode.Unauthorized, new { message = "No token received." });
+                    }
+
+                    var payload = await _service.ValidateGoogleTokenOffline(cookieValue);
+                    if (payload == null)
+                    {
+                        return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token." });
+                    }
+
+
+
+                    // Construct a safe return URL (avoid open redirects)
+                    var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
+                    if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
+                    {
+                        newUrl = $"{newUrl}?token={cookieValue}";
+                        if (newUrl.Length > 2048) newUrl = "/";
+                    }
+                    else
+                    {
+                        newUrl = "/";
+                    }
+
+                    return Redirect(newUrl);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token", error = ex.ToString() });
+                }
+            }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -61,6 +100,7 @@ namespace api_auth_service.Pages.Login
                     Expires = DateTime.UtcNow.AddSeconds(timeInSecond)
                 });
 
+
                 // Construct a safe return URL (avoid open redirects)
                 var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
                 if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
@@ -80,5 +120,6 @@ namespace api_auth_service.Pages.Login
                 return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token", error = ex.ToString() });
             }
         }
+
     }
 }
