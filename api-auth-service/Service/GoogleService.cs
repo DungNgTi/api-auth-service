@@ -4,7 +4,7 @@ using System.Text;
 
 namespace api_auth_service.Service
 {
-    public class DatabaseFetchService
+    public class GoogleService
     {
         static string FetchFromDatabase(string encrypted, string key) =>
             Encoding.UTF8.GetString(Aes.Create().CreateDecryptor(Encoding.UTF8.GetBytes(key), new byte[16])

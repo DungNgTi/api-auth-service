@@ -36,8 +36,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddGoogle(options =>
 {
-    options.ClientId = DatabaseFetchService.FetchContentUser();
-    options.ClientSecret = DatabaseFetchService.FetchSecret();  // Read from appsettings.json
+    options.ClientId = GoogleService.FetchContentUser();
+    options.ClientSecret = GoogleService.FetchSecret();  // Read from appsettings.json
     options.CallbackPath = "/signin-google"; // The callback URL after login
 });
 
