@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Google;
+﻿using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication;
 using Google.Apis.Auth;
 using System.Text;
@@ -13,13 +13,15 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 // Enable CORS for all origins, headers, and methods
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowDynamicOrigins", builder =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        builder.SetIsOriginAllowed(origin => true) // ✅ Allow all origins dynamically
+               .AllowCredentials() // ✅ Allow sending authentication cookies
+               .AllowAnyMethod()
+               .AllowAnyHeader();
     });
 });
+
 
 // Add Google authentication
 builder.Services.AddAuthentication(options =>
@@ -51,7 +53,7 @@ builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader =
 
 var app = builder.Build();
 
-app.UseCors();  // Use CORS policy
+app.UseCors("AllowDynamicOrigins");;  // Use CORS policy
 
 app.UseAuthentication();
 app.UseAuthorization();

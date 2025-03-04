@@ -99,10 +99,12 @@ namespace api_auth_service.Pages.Login
             return newUrl;
         }
 
-        private async Task buildCookie(HttpResponse Response,string IdToken)
+        private async Task buildCookie(HttpResponse Response, string IdToken)
         {
             var payload = await _service.ValidateGoogleTokenOffline(IdToken);
             var domain = new Uri(ReturnUrl).Host;
+            var isLocalHost = Request.Host.Host.Contains("localhost") || domain == "127.0.0.1";
+
             if (payload == null)
             {
                 throw new Exception("Invalid Google Token");
@@ -110,14 +112,13 @@ namespace api_auth_service.Pages.Login
             // Store token in a secure HTTP-only cookie
             Response.Cookies.Append("googleToken", IdToken, new CookieOptions
             {
-                HttpOnly = false,
-                Secure = true,  // Required for HTTPS security
-                Domain = domain,
-                SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                Expires = payload?.ExpirationTimeSeconds != null
-                        ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
-                        : DateTime.UtcNow.AddSeconds(timeInSecond)
+                HttpOnly = true,  // Prevents JavaScript access
+                Secure = !isLocalHost, // Secure=True only in production
+                SameSite = isLocalHost ? SameSiteMode.Lax : SameSiteMode.None, // Allows cross-origin cookie sending
+                Domain = isLocalHost ? null : domain, // ✅ Allows sharing cookies across subdomains only in production
+                Expires = DateTime.UtcNow.AddSeconds(timeInSecond)
             });
+
         }
     }
 
