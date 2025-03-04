@@ -42,34 +42,18 @@ namespace api_auth_service.Pages.Login
             ReturnUrl = Request.Query["url"];
             var cookieValue = Request.Cookies["googleToken"];
 
-            if (!string.IsNullOrEmpty(cookieValue))
+            /*if (!string.IsNullOrEmpty(cookieValue))
             {
                 try
                 {
-                    var payload = await _service.ValidateGoogleTokenOffline(cookieValue);
-                    if (payload == null)
-                    {
-                        return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token." });
-                    }
-
-                    Response.Cookies.Append("googleToken", cookieValue, new CookieOptions
-                    {
-                        HttpOnly = false,
-                        Secure = true,  // Required for HTTPS security
-                        SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                        Expires = payload?.ExpirationTimeSeconds != null
-                            ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
-                            : DateTime.UtcNow.AddSeconds(timeInSecond)
-                    });
-
-
+                    await buildCookie(Response, cookieValue);
                     return Redirect(buildNewUrl());
                 }
                 catch (Exception ex)
                 {
                     return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token", error = ex.ToString() });
                 }
-            }
+            }*/
             return Page();
         }
 
@@ -86,24 +70,7 @@ namespace api_auth_service.Pages.Login
                     return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "No token received." });
                 }
 
-                var payload = await _service.ValidateGoogleTokenOffline(IdToken);
-                if (payload == null)
-                {
-                    return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token." });
-                }
-
-                // Store token in a secure HTTP-only cookie
-                Response.Cookies.Append("googleToken", IdToken, new CookieOptions
-                {
-                    HttpOnly = false,
-                    Secure = true,  // Required for HTTPS security
-                    SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                    Expires = payload?.ExpirationTimeSeconds != null
-                            ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
-                            : DateTime.UtcNow.AddSeconds(timeInSecond)
-                });
-
-
+                await buildCookie(Response, IdToken);
                 // Construct a safe return URL (avoid open redirects)
 
 
@@ -130,6 +97,27 @@ namespace api_auth_service.Pages.Login
                 newUrl = "/";
             }
             return newUrl;
+        }
+
+        private async Task buildCookie(HttpResponse Response,string IdToken)
+        {
+            var payload = await _service.ValidateGoogleTokenOffline(IdToken);
+            var domain = new Uri(ReturnUrl).Host;
+            if (payload == null)
+            {
+                throw new Exception("Invalid Google Token");
+            }
+            // Store token in a secure HTTP-only cookie
+            Response.Cookies.Append("googleToken", IdToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,  // Required for HTTPS security
+                Domain = domain,
+                SameSite = SameSiteMode.None, // Allows cross-site cookie sending
+                Expires = payload?.ExpirationTimeSeconds != null
+                        ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
+                        : DateTime.UtcNow.AddSeconds(timeInSecond)
+            });
         }
     }
 
