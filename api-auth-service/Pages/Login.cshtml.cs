@@ -41,32 +41,21 @@ namespace api_auth_service.Pages.Login
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(cookieValue))
-                    {
-                        StatusCode((int)HttpStatusCode.Unauthorized, new { message = "No token received." });
-                    }
-
                     var payload = await _service.ValidateGoogleTokenOffline(cookieValue);
                     if (payload == null)
                     {
                         return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token." });
                     }
 
-
-
-                    // Construct a safe return URL (avoid open redirects)
-                    var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
-                    if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
+                    Response.Cookies.Append("googleToken", IdToken, new CookieOptions
                     {
-                        newUrl = $"{newUrl}?token={cookieValue}";
-                        if (newUrl.Length > 2048) newUrl = "/";
-                    }
-                    else
-                    {
-                        newUrl = "/";
-                    }
+                        HttpOnly = true,
+                        Secure = true,  // Required for HTTPS security
+                        SameSite = SameSiteMode.None, // Allows cross-site cookie sending
+                        Expires = DateTime.UtcNow.AddSeconds(payload?.ExpirationTimeSeconds ?? timeInSecond)
+                    });
 
-                    return Redirect(newUrl);
+                    return Redirect(buildNewUrl());
                 }
                 catch (Exception ex)
                 {
@@ -97,23 +86,14 @@ namespace api_auth_service.Pages.Login
                     HttpOnly = true,
                     Secure = true,  // Required for HTTPS security
                     SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                    Expires = DateTime.UtcNow.AddSeconds(timeInSecond)
+                    Expires = DateTime.UtcNow.AddSeconds(payload?.ExpirationTimeSeconds ?? timeInSecond)
                 });
 
 
                 // Construct a safe return URL (avoid open redirects)
-                var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
-                if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
-                {
-                    newUrl = $"{newUrl}?token={IdToken}";
-                    if (newUrl.Length > 2048) newUrl = "/";
-                }
-                else
-                {
-                    newUrl = "/";
-                }
 
-                return Redirect(newUrl);
+
+                return Redirect(buildNewUrl());
             }
             catch (Exception ex)
             {
@@ -121,5 +101,20 @@ namespace api_auth_service.Pages.Login
             }
         }
 
+        private string buildNewUrl()
+        {
+            var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
+            if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
+            {
+                //newUrl = $"{newUrl}?token={IdToken}";
+                if (newUrl.Length > 2048) newUrl = "/";
+            }
+            else
+            {
+                newUrl = "/";
+            }
+            return newUrl;
+        }
     }
+
 }
