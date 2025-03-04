@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -15,8 +16,11 @@ namespace api_auth_service.Pages
         public async Task<IActionResult> OnGetAsync()
         {
             // Get the return URL from the query string or default to Login page
-            ReturnUrl = string.IsNullOrEmpty(Request.Query["url"]) ? "/Login" : Request.Query["url"];
-
+            var newUrl = string.IsNullOrEmpty(Request.Query["url"]) ? "/Login" : Request.Query["url"].ToString();
+            var uri = Uri.TryCreate(newUrl, UriKind.Absolute, out var newUri);
+            var isHasToken = newUri.Query.Contains("token");
+            var url = isHasToken ? newUri.GetLeftPart(UriPartial.Path) : newUrl;
+            ReturnUrl = url;
 
             // Ensure we clear the authentication cookie
             if (Request.Cookies.ContainsKey("googleToken"))
@@ -34,8 +38,11 @@ namespace api_auth_service.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            ReturnUrl = string.IsNullOrEmpty(Request.Query["url"]) ? "/Login" : Request.Query["url"];
-
+            var newUrl = string.IsNullOrEmpty(Request.Query["url"]) ? "/Login" : Request.Query["url"].ToString();
+            var uri = Uri.TryCreate(newUrl, UriKind.Absolute, out var newUri);
+            var isHasToken = newUri.Query.Contains("token");
+            var url = isHasToken ? newUri.GetLeftPart(UriPartial.Path) : newUrl;
+            ReturnUrl = url;
 
             // Ensure we clear the authentication cookie
             Response.Cookies.Delete("googleToken");

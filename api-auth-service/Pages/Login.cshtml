@@ -32,7 +32,7 @@
     <script>
         function handleCredentialResponse(response) {
             // Fill hidden input fields with token and return URL
-            document.getElementById("id-token").value = response?.credential;
+            document.getElementById("id-token").value = response?.credential || '@Model.IdToken';
             document.getElementById("return-url").value = new URLSearchParams(window.location.search).get("url") || "/";
 
             // Submit the form programmatically
