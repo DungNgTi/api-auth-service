@@ -40,6 +40,7 @@ namespace api_auth_service.Controllers
                 {
                     UserInfo = new
                     {
+                        Picture = claims.ContainsKey("picture") ? claims["picture"] : null,
                         Name = claims.ContainsKey("name") ? claims["name"] : null,
                         Email = (claims.ContainsKey(System.Security.Claims.ClaimTypes.Email) ? claims[System.Security.Claims.ClaimTypes.Email] : null) ??
                                 (claims.ContainsKey("email") ? claims["email"] : null),

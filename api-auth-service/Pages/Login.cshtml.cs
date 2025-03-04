@@ -20,6 +20,9 @@ namespace api_auth_service.Pages.Login
 
         private static int timeInSecond;
 
+        [BindProperty]
+        public bool isNeedRefresh {  get; set; }
+
         public LoginModel(IConfiguration configuration)
         {
             var delay = configuration["Cookie:Second"];
@@ -47,13 +50,16 @@ namespace api_auth_service.Pages.Login
                         return StatusCode((int)HttpStatusCode.Unauthorized, new { message = "Invalid Google ID token." });
                     }
 
-                    Response.Cookies.Append("googleToken", IdToken, new CookieOptions
+                    Response.Cookies.Append("googleToken", cookieValue, new CookieOptions
                     {
                         HttpOnly = true,
                         Secure = true,  // Required for HTTPS security
                         SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                        Expires = DateTime.UtcNow.AddSeconds(payload?.ExpirationTimeSeconds ?? timeInSecond)
+                        Expires = payload?.ExpirationTimeSeconds != null
+                            ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
+                            : DateTime.UtcNow.AddSeconds(timeInSecond)
                     });
+
 
                     return Redirect(buildNewUrl());
                 }
@@ -86,14 +92,17 @@ namespace api_auth_service.Pages.Login
                     HttpOnly = true,
                     Secure = true,  // Required for HTTPS security
                     SameSite = SameSiteMode.None, // Allows cross-site cookie sending
-                    Expires = DateTime.UtcNow.AddSeconds(payload?.ExpirationTimeSeconds ?? timeInSecond)
+                    Expires = payload?.ExpirationTimeSeconds != null
+                            ? DateTimeOffset.FromUnixTimeSeconds(payload.ExpirationTimeSeconds.Value).UtcDateTime
+                            : DateTime.UtcNow.AddSeconds(timeInSecond)
                 });
 
 
                 // Construct a safe return URL (avoid open redirects)
 
 
-                return Redirect(buildNewUrl());
+                //return Redirect(buildNewUrl());
+                return Page();
             }
             catch (Exception ex)
             {
