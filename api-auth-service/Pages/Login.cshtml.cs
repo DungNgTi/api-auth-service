@@ -89,7 +89,7 @@ namespace api_auth_service.Pages.Login
             var newUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl;
             if (Uri.TryCreate(newUrl, UriKind.Absolute, out var result) || newUrl.StartsWith("/"))
             {
-                //newUrl = $"{newUrl}?token={IdToken}";
+                newUrl = $"{newUrl}?token={IdToken}";
                 if (newUrl.Length > 2048) newUrl = "/";
             }
             else
