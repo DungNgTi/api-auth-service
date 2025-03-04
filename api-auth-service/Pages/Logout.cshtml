@@ -11,26 +11,30 @@
 <body>
     <h1>Logging out...</h1>
 
-    <form method="post">
+    <form id="logoutForm" method="post">
         <p>Logging out... you will be redirected shortly.</p>
         <button type="submit">Logout</button>
     </form>
 
     <script>
-
         function setCookie(cname, cvalue, exMins) {
             var d = new Date();
-            d.setTime(d.getTime() + (exMins*60*1000));
-            var expires = "expires="+d.toUTCString();
+            d.setTime(d.getTime() + (exMins * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
             document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
         }
 
-        
-        // Optionally, you can automatically redirect after a certain time
         setTimeout(() => {
-            setCookie('googleToken','',0)
-            window.location.href = '@Model.ReturnUrl'; // Redirect to ReturnUrl if provided
-        }, 2000); // 2 seconds delay before redirecting
+            setCookie('googleToken', '', 0);
+
+            // Creating a hidden form dynamically
+            let form = document.createElement("form");
+            form.method = "POST";
+            form.action = window.location.href; // Submit to the same page
+
+            document.body.appendChild(form);
+            form.submit();
+        }, 2000); // 2 seconds delay
     </script>
 </body>
 </html>

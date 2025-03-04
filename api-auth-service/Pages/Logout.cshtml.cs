@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace api_auth_service.Pages
 {
+    [IgnoreAntiforgeryToken] 
     public class LogoutModel : PageModel
     {
         [BindProperty]
@@ -26,9 +27,25 @@ namespace api_auth_service.Pages
             await Task.CompletedTask;
 
             // Redirect to the specified return URL or default to Login page if none exists
-            var redirectUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/Login" : ReturnUrl;
+            //var redirectUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/Login" : ReturnUrl;
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            ReturnUrl = string.IsNullOrEmpty(Request.Query["url"]) ? "/Login" : Request.Query["url"];
+
+
+            // Ensure we clear the authentication cookie
+            Response.Cookies.Delete("googleToken");
+            // Complete the async method properly
+            await Task.CompletedTask;
+
+            // Redirect to the specified return URL or default to Login page if none exists
+            var redirectUrl = string.IsNullOrWhiteSpace(ReturnUrl) ? "/Login" : ReturnUrl;
+
+            return Redirect(redirectUrl);
         }
     }
 }
