@@ -20,8 +20,7 @@ namespace api_auth_service.Pages.Login
 
         private static int timeInSecond;
 
-        [BindProperty]
-        public bool isNeedRefresh {  get; set; }
+        
 
         public LoginModel(IConfiguration configuration)
         {
@@ -30,13 +29,16 @@ namespace api_auth_service.Pages.Login
         }
 
         [BindProperty]
+        public string IsNeedRefresh { get; set; }
+
+        [BindProperty]
         public string IdToken { get; set; }
 
         [BindProperty]
         public string ReturnUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
-        {
+            {
             ReturnUrl = Request.Query["url"];
             var cookieValue = Request.Cookies["googleToken"];
 
@@ -52,7 +54,7 @@ namespace api_auth_service.Pages.Login
 
                     Response.Cookies.Append("googleToken", cookieValue, new CookieOptions
                     {
-                        HttpOnly = true,
+                        HttpOnly = false,
                         Secure = true,  // Required for HTTPS security
                         SameSite = SameSiteMode.None, // Allows cross-site cookie sending
                         Expires = payload?.ExpirationTimeSeconds != null
@@ -73,6 +75,10 @@ namespace api_auth_service.Pages.Login
 
         public async Task<IActionResult> OnPostAsync()
         {
+            if (IsNeedRefresh == "true")
+            {
+               return Redirect(buildNewUrl());
+            }
             try
             {
                 if (string.IsNullOrEmpty(IdToken))
@@ -89,7 +95,7 @@ namespace api_auth_service.Pages.Login
                 // Store token in a secure HTTP-only cookie
                 Response.Cookies.Append("googleToken", IdToken, new CookieOptions
                 {
-                    HttpOnly = true,
+                    HttpOnly = false,
                     Secure = true,  // Required for HTTPS security
                     SameSite = SameSiteMode.None, // Allows cross-site cookie sending
                     Expires = payload?.ExpirationTimeSeconds != null
@@ -101,8 +107,9 @@ namespace api_auth_service.Pages.Login
                 // Construct a safe return URL (avoid open redirects)
 
 
-                return Redirect(buildNewUrl());
-                //return Page();
+                //return Redirect(buildNewUrl());
+                IsNeedRefresh = "true";
+                return Page();
             }
             catch (Exception ex)
             {

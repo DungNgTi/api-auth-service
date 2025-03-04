@@ -18,19 +18,21 @@
     <form id="login-form" method="post" asp-page="Login">
         <input type="hidden" name="IdToken" id="id-token">
         <input type="hidden" name="ReturnUrl" id="return-url">
+        <input type="hidden" name="IsNeedRefresh" id="is-need-refresh">
     </form>
-
-    if (@Model.isNeedRefresh) {
-        <p>Automatic redirect...</p>
-    } else {
-        <div id="google-signin-button"></div>
+    @{
+        if (Model.IsNeedRefresh == "true"){
+            <p>Automatic redirect...</p>
+        }
+        else {
+            <div id="google-signin-button"></div>
+        }
     }
-    
 
     <script>
         function handleCredentialResponse(response) {
             // Fill hidden input fields with token and return URL
-            document.getElementById("id-token").value = response.credential;
+            document.getElementById("id-token").value = response?.credential;
             document.getElementById("return-url").value = new URLSearchParams(window.location.search).get("url") || "/";
 
             // Submit the form programmatically
@@ -49,9 +51,10 @@
             );
         };
 
-        var isNeedRefresh = @Model.isNeedRefresh
-        if (isNeedRefresh) {
-            window.location.reload();
+        var IsNeedRefresh = '@Model.IsNeedRefresh';
+        if (IsNeedRefresh === 'true') {
+            document.getElementById("is-need-refresh").value = 'true';
+            handleCredentialResponse();
         }
     </script>
 </body>
