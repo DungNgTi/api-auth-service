@@ -101,8 +101,8 @@ namespace api_auth_service.Pages.Login
                 // Construct a safe return URL (avoid open redirects)
 
 
-                //return Redirect(buildNewUrl());
-                return Page();
+                return Redirect(buildNewUrl());
+                //return Page();
             }
             catch (Exception ex)
             {
