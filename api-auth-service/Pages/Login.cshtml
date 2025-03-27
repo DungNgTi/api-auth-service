@@ -1,61 +1,139 @@
 ﻿@page
 @model api_auth_service.Pages.Login.LoginModel
 @{
-    Layout = null;
+    ViewData["Title"] = "Login with Google";
+    Layout = "_Layout";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login with Google</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-    <h1>Login with Google</h1>
 
-    <!-- Ensure the form submits to the current page with a POST request -->
+<style>
+    /* Container chính */
+    .login-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 160px); /* Trừ chiều cao của header và footer */
+        text-align: center;
+        animation: fadeInUp 1s ease-in-out;
+    }
+
+    /* Tiêu đề */
+    .login-title {
+        color: #2c3e50;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeInDown 1s ease-in-out;
+    }
+
+    /* Nút Google Sign-In */
+    #google-signin-button {
+        margin-top: 20px;
+        animation: fadeInUp 1s ease-in-out;
+    }
+
+    /* Thông báo redirect */
+    .redirect-message {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-top: 20px;
+        animation: fadeInUp 1s ease-in-out;
+    }
+
+    /* Spinner */
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #ff6b6b;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-top: 20px;
+    }
+
+    /* Animation */
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="login-container">
+    <h1 class="login-title">Login with Google</h1>
+
+    <!-- Form login -->
     <form id="login-form" method="post" asp-page="Login">
         <input type="hidden" name="IdToken" id="id-token">
         <input type="hidden" name="ReturnUrl" id="return-url">
         <input type="hidden" name="IsNeedRefresh" id="is-need-refresh">
     </form>
-    @{
-        if (Model.IsNeedRefresh == "true"){
-            <p>Automatic redirect...</p>
-        }
-        else {
-            <div id="google-signin-button"></div>
-        }
+
+    @if (Model.IsNeedRefresh == "true")
+    {
+        <p class="redirect-message">Automatic redirect...</p>
+        <div class="spinner"></div>
+    }
+    else
+    {
+        <div id="google-signin-button"></div>
+    }
+</div>
+
+<script>
+    function handleCredentialResponse(response) {
+        // Fill hidden input fields with token and return URL
+        document.getElementById("id-token").value = response?.credential || '@Model.IdToken';
+        document.getElementById("return-url").value = new URLSearchParams(window.location.search).get("url") || "/";
+
+        // Submit the form programmatically
+        document.getElementById("login-form").submit();
     }
 
-    <script>
-        function handleCredentialResponse(response) {
-            // Fill hidden input fields with token and return URL
-            document.getElementById("id-token").value = response?.credential || '@Model.IdToken';
-            document.getElementById("return-url").value = new URLSearchParams(window.location.search).get("url") || "/";
+    window.onload = function() {
+        google.accounts.id.initialize({
+            client_id: "290066260782-o2gtb1mev7aq0pi736n3bcrl6v8m3fim.apps.googleusercontent.com",
+            callback: handleCredentialResponse
+        });
 
-            // Submit the form programmatically
-            document.getElementById("login-form").submit();
-        }
+        google.accounts.id.renderButton(
+            document.getElementById("google-signin-button"),
+            { theme: "outline", size: "large" }
+        );
+    };
 
-        window.onload = function() {
-            google.accounts.id.initialize({
-                client_id: "290066260782-o2gtb1mev7aq0pi736n3bcrl6v8m3fim.apps.googleusercontent.com",
-                callback: handleCredentialResponse
-            });
-
-            google.accounts.id.renderButton(
-                document.getElementById("google-signin-button"),
-                { theme: "outline", size: "large" }
-            );
-        };
-
-        var IsNeedRefresh = '@Model.IsNeedRefresh';
-        if (IsNeedRefresh === 'true') {
-            document.getElementById("is-need-refresh").value = 'true';
-            handleCredentialResponse();
-        }
-    </script>
-</body>
-</html>
+    var IsNeedRefresh = '@Model.IsNeedRefresh';
+    if (IsNeedRefresh === 'true') {
+        document.getElementById("is-need-refresh").value = 'true';
+        handleCredentialResponse();
+    }
+</script>
