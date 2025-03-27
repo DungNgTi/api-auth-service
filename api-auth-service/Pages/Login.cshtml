@@ -19,19 +19,55 @@
 
     /* Tiêu đề */
     .login-title {
-        color: #2c3e50;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 100%);
+        font-size: 3.5rem; /* Tăng kích thước font */
+        font-weight: bold;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ff6b6b);
+        background-size: 200% 200%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: fadeInDown 1s ease-in-out;
+        animation: gradientAnimation 5s ease infinite, fadeInDown 1s ease-in-out;
     }
 
     /* Nút Google Sign-In */
     #google-signin-button {
-        margin-top: 20px;
+        margin-top: 30px;
         animation: fadeInUp 1s ease-in-out;
+        position: relative;
+        transform: scale(1.2); /* Tăng kích thước nút */
     }
+
+        /* Tùy chỉnh nút Google Sign-In */
+        #google-signin-button > div {
+            border-radius: 25px !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            background: white !important;
+            border: 3px solid transparent !important;
+            background-clip: padding-box !important;
+            position: relative;
+            z-index: 1;
+        }
+
+            /* Thêm viền gradient động */
+            #google-signin-button > div::before {
+                content: '';
+                position: absolute;
+                top: -3px;
+                left: -3px;
+                right: -3px;
+                bottom: -3px;
+                border-radius: 28px;
+                background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ff6b6b);
+                background-size: 200% 200%;
+                animation: gradientAnimation 5s ease infinite;
+                z-index: -1;
+            }
+
+            #google-signin-button > div:hover {
+                transform: translateY(-3px) !important;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+            }
 
     /* Thông báo redirect */
     .redirect-message {
@@ -86,6 +122,20 @@
             transform: rotate(360deg);
         }
     }
+
+    @@keyframes gradientAnimation {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
 </style>
 
 <div class="login-container">
@@ -127,7 +177,7 @@
 
         google.accounts.id.renderButton(
             document.getElementById("google-signin-button"),
-            { theme: "outline", size: "large" }
+            { theme: "outline", size: "large", width: 300 } // Tăng chiều rộng nút
         );
     };
 
